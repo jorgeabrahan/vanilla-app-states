@@ -1,0 +1,15 @@
+{
+  "name": "vanilla-app-states",
+  "version": "1.0.1",
+  "description": "Manage states in your vanilla web app easily",
+  "main": "State/AppState.js",
+  "author": "jorge_siguenza",
+  "license": "ISC",
+  "type": "module",
+  "scripts": {
+    "transpile": "npx tsc -w"
+  },
+  "devDependencies": {
+    "typescript": "5.4.5"
+  }
+}
