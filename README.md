@@ -16,6 +16,7 @@
   - [Boolean states](#boolean-states)
   - [Rendering complex states](#rendering-complex-states)
   - [Rendering multiple times a state in the DOM](#rendering-multiple-times-a-state-in-the-dom)
+  - [Using an enum state](#using-an-enum-state)
 - [Source](#source)
 
 <a style="display: block; text-align: right;" href="#vanilla-app-states">Go back to language selection</a>
@@ -323,6 +324,202 @@ With this change, the state is obtained from the `main` element instead of the `
 
 <a style="display: block; text-align: right;" href="#🇬🇧-english-documentation">Go back to index</a>
 
+### Using an enum state
+
+You might want to create states that can only have a limited set of values. From now on, this states will be called enum states.
+
+An enum state is created the same way as a regular state, but there are a few differences:
+
+1. The state must be a string or a number.
+2. You need to specify an array of possible values for the state.
+3. The state can only be set to one of the possible values, this includes the initial value.
+
+Let's see an example:
+
+```javascript
+const tabs = new State({
+  id: 'tabs',
+  initial: 'create',
+  possibleValues: ['create', 'edit', 'delete'],
+})
+```
+
+As you can see, the `possibleValues` array is an array of strings. This means that the state can only be set to one of the strings in the array. If you try to set the state to a value that is not in the array, you will get an error. For instance:
+
+```javascript
+tabs.update('example')
+```
+
+This will throw an error because the state can only be set to one of the strings in the `possibleValues` array.
+
+As mentioned before, this also works for numbers:
+
+```javascript
+const options = new State({
+  id: 'options',
+  initial: 0,
+  possibleValues: [0, 1, 2],
+})
+```
+
+In this case, the state can only be set to one of the numbers in the array.
+
+> Note: The `possibleValues` array must not be empty.
+
+> Note: Same thing applies with an enum state of numbers, if you try to set the state to a value that is not in the array, you will get an error.
+
+Now, keeping up with the string enum state example, note that you could also externalize the possible values to an object, this could come in handy to also set any value in the state:
+
+```javascript
+const modalTabs = {
+  create: 'create',
+  edit: 'edit',
+  delete: 'delete',
+}
+
+const tabs = new State({
+  id: 'tabs',
+  initial: modalTabs.create,
+  possibleValues: Object.values(modalTabs),
+})
+```
+
+In this case, the state can only be set to one of the values in the `modalTabs` object. And as you can see, now you don't have any `magic strings` in your code, and you could use the `modalTabs` object to update the state.
+
+Let's see an example on how to use this tabs state with the `onRender` function, let's first create the HTML:
+
+```html
+<dialog open>
+  <nav>
+    <!-- The data-tab attribute will be used to change the state of the tabs -->
+    <button class="tabSelectorButton" data-tab="create">Create</button>
+    <button class="tabSelectorButton" data-tab="edit">Edit</button>
+    <button class="tabSelectorButton" data-tab="delete">Delete</button>
+  </nav>
+  <section data-state="tabs"></section>
+</dialog>
+```
+
+Now, let's create our state to manage the tabs of the modal(dialog): 
+
+```javascript
+const modalTabs = {
+  create: 'create',
+  edit: 'edit',
+  delete: 'delete',
+}
+const tabs = new State({
+  id: 'tabs',
+  initial: modalTabs.create,
+  possibleValues: Object.values(modalTabs),
+  onRender: (current) => {
+    // Here we could use the current state to render the content of the tab
+    // the current state determines which tab is active
+    if (current === modalTabs.create) {
+      return `<p>Create Tab</p>`
+    }
+    if (current === modalTabs.edit) {
+      return `<p>Edit Tab</p>`
+    }
+    return `<p>Delete Tab</p>`
+  }
+})
+
+// Here we get all the buttons that could change the state of the tabs
+document.querySelectorAll('.tabSelectorButton').forEach((button) => {
+  // And for each button we add an event listener to change the state
+  button.addEventListener('click', () => {
+    // Here we use the data-tab attribute to change the state of the tabs
+    tabs.update(button.getAttribute('data-tab'))
+  })
+})
+```
+
+As you can see, the `onRender` function is a function that receives the current state as a parameter and returns a string that represents the content to be inserted into the DOM, in this case, the content of the active tab.
+
+There's no problem with the previous implementation to create a system of tabs using a state, however for this specific use case, we could also use the `data-show-if` attribute to show or hide the content of the tabs based on the current value of the tabs state.
+
+we simply need to modify our code to use the `data-show-if` attribute like so:
+
+```html
+<dialog open>
+  <nav>
+    <!-- The data-tab attribute will be used to change the state of the tabs -->
+    <button class="tabSelectorButton" data-tab="create">Create</button>
+    <button class="tabSelectorButton" data-tab="edit">Edit</button>
+    <button class="tabSelectorButton" data-tab="delete">Delete</button>
+  </nav>
+  <!-- now we have an element for each tab, each with a data-show-if attribute -->
+  <!-- if the value of the data-show-if attribute is the same as the current state of the tabs -->
+  <!-- then the element will be shown -->
+  <section data-state="tabs" data-show-if="create">
+    <p>Create Tab</p>
+  </section>
+  <section data-state="tabs" data-show-if="edit">
+    <p>Edit Tab</p>
+  </section>
+  <section data-state="tabs" data-show-if="delete">
+    <p>Delete Tab</p>
+  </section>
+</dialog>
+```
+
+> Note: The `data-show-if` attribute is only supported for enum states with string values. Also if there's a typo in the value of the `data-show-if` attribute, you will get an error. So for instance, if you would've written `crete` instead of `create`, you would get an error, since `crete` is not a possible value of the `possibleValues` array.
+
+Now, let's create our state to manage the tabs of the modal(dialog): 
+
+```javascript
+const modalTabs = {
+  create: 'create',
+  edit: 'edit',
+  delete: 'delete',
+}
+/* now there's no need to use the onRender function, since the data-show-if attribute will determine which tab to show */
+const tabs = new State({
+  id: 'tabs',
+  initial: modalTabs.create,
+  possibleValues: Object.values(modalTabs)
+})
+
+// Here we get all the buttons that could change the state of the tabs
+document.querySelectorAll('.tabSelectorButton').forEach((button) => {
+  // And for each button we add an event listener to change the state
+  button.addEventListener('click', () => {
+    // Here we use the data-tab attribute to change the state of the tabs
+    tabs.update(button.getAttribute('data-tab'))
+  })
+})
+```
+
+> Note: You can't use the `data-show-if` and set an onRender function at the same time, since the `data-show-if` attribute will determine which tab to show, and the onRender function will determine the content of the tab.
+
+Of course, you could still listen to changes in the state and update the DOM accordingly:
+
+```javascript
+/* .... */
+const tabSelectorButtons = document.querySelectorAll('.tabSelectorButton')
+const tabs = new State({
+  id: 'tabs',
+  initial: modalTabs.create,
+  possibleValues: Object.values(modalTabs),
+  onChange: (current) => {
+    /* this will add the active class to the button that is active */
+    /* and remove the active class from the other buttons */
+    tabSelectorButtons.forEach((button) => {
+      if (button.getAttribute('data-tab') === current) button.classList.add('active')
+      button.classList.remove('active')
+    })
+  }
+})
+tabSelectorButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    tabs.update(button.getAttribute('data-tab'))
+  })
+})
+```
+
+<a style="display: block; text-align: right;" href="#🇬🇧-english-documentation">Go back to index</a>
+
 ## Source
 
 The source code of this package is available on [GitHub](https://github.com/jorgeabrahan/vanilla-app-states).
@@ -345,6 +542,7 @@ This package is also published on [npm](https://www.npmjs.com/package/vanilla-ap
   - [Estados booleanos](#estados-booleanos)
   - [Renderizando estados complejos](#renderizando-estados-complejos)
   - [Renderizando multiples veces un estado en el DOM](#renderizando-multiples-veces-un-estado-en-el-dom)
+  - [Usando un estado enum](#utilizando-un-estado-enum)
 - [Recursos](#recursos)
 
 <a style="display: block; text-align: right;" href="#vanilla-app-states">Volver a la selección de idiomas</a>
@@ -650,6 +848,202 @@ Con este cambio, el estado se obtiene del elemento `main` en lugar del `document
 
 
 > Nota: Si no se especifica un `wrapper`, el estado se obtiene del `document.body`.
+
+<a style="display: block; text-align: right;" href="#🇪🇸-documentación-en-español">Volver al índice</a>
+
+### Utilizando un estado enum
+
+Es posible que desee crear estados que solo puedan tener un conjunto limitado de valores. De ahora en adelante, estos estados se llamarán estados enumerados.
+
+Un estado de enumeración se crea de la misma manera que un estado normal, pero existen algunas diferencias:
+
+1. El estado debe ser una cadena o un número.
+2. Debe especificar una serie de valores posibles para el estado.
+3. El estado solo se puede establecer en uno de los valores posibles, esto incluye el valor inicial.
+
+Veamos un ejemplo:
+
+```javascript
+const tabs = new State({
+  id: 'tabs',
+  initial: 'create',
+  possibleValues: ['create', 'edit', 'delete'],
+})
+```
+
+Como puede ver, el parametro `possibleValues` es arreglo de `string`. Esto significa que el estado sólo se puede establecer en una de las `string` del arreglo. Si intenta establecer el estado en un valor que no está en el arreglo, obtendrá un error. Por ejemplo:
+
+```javascript
+tabs.update('example')
+```
+
+Esto generará un error porque el estado solo se puede establecer a uno de los valores del arreglo `possibleValues`.
+
+Como se mencionó anteriormente, esto también funciona para números:
+
+```javascript
+const options = new State({
+  id: 'options',
+  initial: 0,
+  possibleValues: [0, 1, 2],
+})
+```
+
+En este caso, el estado sólo se puede establecer en uno de los números del arreglo.
+
+> Nota: El arreglo `possibleValues` no debe estar vacío. 
+
+> Nota: Lo mismo aplica con un estado enum de números; si intenta establecer el estado en un valor que no está en los `possibleValues`, obtendrá un error.
+
+Ahora, siguiendo con el ejemplo del estado enum de `string`, tenga en cuenta que también puede externalizar los valores posibles a un objeto, lo que podría resultar útil para establecer también cualquier valor en el estado:
+
+```javascript
+const modalTabs = {
+  create: 'create',
+  edit: 'edit',
+  delete: 'delete',
+}
+
+const tabs = new State({
+  id: 'tabs',
+  initial: modalTabs.create,
+  possibleValues: Object.values(modalTabs),
+})
+```
+
+En este caso, el estado solo se puede establecer en uno de los valores del objeto `modalTabs`. Y como puedes ver, ahora no tienes ninguna `magic string` en tu código y puedes usar el objeto `modalTabs` para actualizar el estado.
+
+Veamos un ejemplo de cómo usar este estado de pestañas con la función `onRender`, primero creemos el HTML:
+
+```html
+<dialog open>
+  <nav>
+    <!-- El atributo data-tab se utilizará para cambiar el estado de las pestañas. -->
+    <button class="tabSelectorButton" data-tab="create">Create</button>
+    <button class="tabSelectorButton" data-tab="edit">Edit</button>
+    <button class="tabSelectorButton" data-tab="delete">Delete</button>
+  </nav>
+  <section data-state="tabs"></section>
+</dialog>
+```
+
+Ahora, creemos nuestro estado para administrar las pestañas del modal (diálogo):
+
+```javascript
+const modalTabs = {
+  create: 'create',
+  edit: 'edit',
+  delete: 'delete',
+}
+const tabs = new State({
+  id: 'tabs',
+  initial: modalTabs.create,
+  possibleValues: Object.values(modalTabs),
+  onRender: (current) => {
+    // Aquí podríamos usar el estado actual para representar el contenido de la pestaña.
+    // el estado actual determina qué pestaña está activa
+    if (current === modalTabs.create) {
+      return `<p>Create Tab</p>`
+    }
+    if (current === modalTabs.edit) {
+      return `<p>Edit Tab</p>`
+    }
+    return `<p>Delete Tab</p>`
+  }
+})
+
+// Aquí obtenemos todos los botones que podrían cambiar el estado de las pestañas.
+document.querySelectorAll('.tabSelectorButton').forEach((button) => {
+  // Y para cada botón agregamos un detector de eventos para cambiar el estado.
+  button.addEventListener('click', () => {
+    // Aquí usamos el atributo data-tab para cambiar el estado de las pestañas.
+    tabs.update(button.getAttribute('data-tab'))
+  })
+})
+```
+
+Como puedes ver, la función `onRender` es una función que recibe como parámetro el estado actual y devuelve una cadena que representa el contenido a insertar en el DOM, en este caso, el contenido de la pestaña activa.
+
+No hay ningún problema con la implementación anterior para crear un sistema de pestañas usando un estado, sin embargo, para este caso de uso específico, también podríamos usar el atributo `data-show-if` para mostrar u ocultar el contenido de las pestañas según el estado actual. valor del estado de las pestañas.
+
+Simplemente necesitamos modificar nuestro código para usar el atributo `data-show-if` así:
+
+```html
+<dialog open>
+  <nav>
+    <!-- El atributo data-tab se utilizará para cambiar el estado de las pestañas. -->
+    <button class="tabSelectorButton" data-tab="create">Create</button>
+    <button class="tabSelectorButton" data-tab="edit">Edit</button>
+    <button class="tabSelectorButton" data-tab="delete">Delete</button>
+  </nav>
+  <!-- ahora tenemos un elemento para cada pestaña, cada una con un atributo data-show-if -->
+  <!-- si el valor del atributo data-show-if es el mismo que el estado actual de las pestañas -->
+  <!-- entonces se mostrará el elemento -->
+  <section data-state="tabs" data-show-if="create">
+    <p>Create Tab</p>
+  </section>
+  <section data-state="tabs" data-show-if="edit">
+    <p>Edit Tab</p>
+  </section>
+  <section data-state="tabs" data-show-if="delete">
+    <p>Delete Tab</p>
+  </section>
+</dialog>
+```
+
+> Nota: El atributo `data-show-if` solo se admite para estados enum con valores de `string`. Además, si hay un error tipográfico en el valor del atributo `data-show-if`, obtendrá un error. Entonces, por ejemplo, si hubiera escrito `creta` en lugar de `create`, obtendría un error, ya que `creta` no es un valor posible del arreglo `posiblesValues`.
+
+Ahora, creemos nuestro estado para administrar las pestañas del modal (diálogo):
+
+```javascript
+const modalTabs = {
+  create: 'create',
+  edit: 'edit',
+  delete: 'delete',
+}
+/* ahora no es necesario usar la función onRender, ya que el atributo data-show-if determinará qué pestaña mostrar */
+const tabs = new State({
+  id: 'tabs',
+  initial: modalTabs.create,
+  possibleValues: Object.values(modalTabs)
+})
+
+// Aquí obtenemos todos los botones que podrían cambiar el estado de las pestañas.
+document.querySelectorAll('.tabSelectorButton').forEach((button) => {
+  // Y para cada botón agregamos un detector de eventos para cambiar el estado.
+  button.addEventListener('click', () => {
+    // Aquí usamos el atributo data-tab para cambiar el estado de las pestañas.
+    tabs.update(button.getAttribute('data-tab'))
+  })
+})
+```
+
+> Nota: No puede usar `data-show-if` y configurar una función `onRender` al mismo tiempo, ya que el atributo `data-show-if` determinará qué pestaña mostrar y la función `onRender` determinará el contenido. de la pestaña.
+
+Por supuesto, aún puedes escuchar los cambios en el estado y actualizar el DOM en consecuencia:
+
+```javascript
+/* .... */
+const tabSelectorButtons = document.querySelectorAll('.tabSelectorButton')
+const tabs = new State({
+  id: 'tabs',
+  initial: modalTabs.create,
+  possibleValues: Object.values(modalTabs),
+  onChange: (current) => {
+    /* esto agregará la clase activa al botón que está activo */
+    /* y eliminar la clase activa de los otros botones */
+    tabSelectorButtons.forEach((button) => {
+      if (button.getAttribute('data-tab') === current) button.classList.add('active')
+      button.classList.remove('active')
+    })
+  }
+})
+tabSelectorButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    tabs.update(button.getAttribute('data-tab'))
+  })
+})
+```
 
 <a style="display: block; text-align: right;" href="#🇪🇸-documentación-en-español">Volver al índice</a>
 

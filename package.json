@@ -1,6 +1,6 @@
 {
   "name": "vanilla-app-states",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Manage states in your vanilla web app easily",
   "main": "State/AppState.js",
   "author": "jorge_siguenza",
