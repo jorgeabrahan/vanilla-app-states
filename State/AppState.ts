@@ -1,6 +1,4 @@
-const isOneOfType = (types: string[], value: any) => types.some((type) => typeof value === type)
-
-class DOMHandler<T> {
+export class DOMUpdatesHandler<T> {
   #stateElements: HTMLElement[]
   #stateId: string
   #stateWrapper: HTMLElement
@@ -14,108 +12,115 @@ class DOMHandler<T> {
   ) {
     this.#stateId = stateId
     this.#stateWrapper = stateWrapper
+    this.#isCustomRenderEnabled = isCustomRenderEnabled
     this.#stateElements = Array.from(
       this.#stateWrapper.querySelectorAll(`[data-state="${this.#stateId}"]`)
     )
-    this.#isCustomRenderEnabled = isCustomRenderEnabled
     this.#onRender = onRender
   }
 
-  updateElements(state: T) {
+  updateDOMElements(state: T) {
     for (const element of this.#stateElements) {
       if (this.#isCustomRenderEnabled) {
-        this.#handleCustomRendering(state, element);
+        this.#handleObjectStateRendering(state, element)
         continue
       }
-      this.#handleNativeRendering(state, element);
+      this.#handleSingleValueStateRendering(state, element)
     }
   }
-  #handleCustomRendering(state: T, element: HTMLElement) {
+  #handleObjectStateRendering(state: T, element: HTMLElement) {
+    if (typeof state !== 'object') return
     const content = this.#onRender(state)
-    if (typeof content === 'string') {
-      if (element.innerHTML !== content) {
-        element.innerHTML = content
-      }
-    } else {
-      throw new Error('onRender must return a string')
-    }
+    if (typeof content !== 'string') throw new Error('onRender must return a string')
+    if (element.innerHTML !== content) element.innerHTML = content
   }
-
-  #handleNativeRendering(state: T, element: HTMLElement) {
-    const types = ['string', 'number', 'bigint']
-    if (isOneOfType(types, state)) {
+  #handleSingleValueStateRendering(state: T, element: HTMLElement) {
+    if (typeof state === 'string' || typeof state === 'number' || typeof state === 'bigint') {
       const newContent = `${state}`
-      if (element.textContent !== newContent) {
-        element.textContent = newContent
-      }
-    } else if (typeof state === 'boolean') {
+      // if newContent is the same as the current content, do nothing
+      if (element.textContent === newContent) return
+      // otherwise, update the text content of the element
+      element.textContent = newContent
+      return
+    }
+    if (typeof state === 'boolean') {
+      // boolean states are used to toggle the visibility of an element
       const display = state ? '' : 'none'
-      if (element.style.display !== display) {
-        element.style.display = display
-      }
+      if (element.style.display === display) return
+      element.style.display = display
     }
   }
 }
 
-export class AppState<T> {
+export class State<T> {
   #stateId: string
   #stateInitial: T
   #stateCurrent: T
   onStateChange: (state: T, prevState: T) => void
   onRender: (state: T) => string
   #isCustomRenderEnabled: boolean
-  #domHandler: DOMHandler<T>
-  get stateId(): string {
+  #domHandler: DOMUpdatesHandler<T>
+
+  // since stateId and stateCurrent are readonly properties
+  // they are declared as private and a getter is provided
+  get id(): string {
     return this.#stateId
   }
-  get stateCurrent(): T {
+  get current(): T {
     return this.#stateCurrent
   }
   constructor({
-    stateId,
-    stateWrapper = document.body,
-    stateInitial,
-    onStateChange = () => {},
+    id,
+    initial,
+    wrapper = document.body,
+    onChange = () => {},
     onRender
   }: {
-    stateId: string
-    stateWrapper: HTMLElement
-    stateInitial: T
-    onStateChange?: (state: T, prevState: T) => void
+    id: string
+    initial: T
+    wrapper?: HTMLElement
+    onChange?: (state: T, prevState: T) => void
     onRender?: (state: T) => string
   }) {
-    if (!stateId || typeof stateId !== 'string') {
-      throw new Error('stateId must be a non-empty string')
-    }
-    if (!(stateWrapper instanceof HTMLElement)) {
+    if (!id || typeof id !== 'string') throw new Error('id must be a non-empty string')
+    if (!(wrapper instanceof HTMLElement))
       throw new Error('stateWrapper must be an instance of HTMLElement')
-    }
-    this.#stateId = stateId
-    this.#stateInitial = stateInitial
-    this.#stateCurrent = stateInitial
-    this.onStateChange = onStateChange
+
+    this.#stateId = id
+    this.#stateInitial = initial
+    this.#stateCurrent = initial
+    this.onStateChange = onChange
+    // if an onRender function is provided, it will be used to render the state
+    // therefore 'custom rendering' will be enabled
+    // otherwise, the default rendering will be used
     this.#isCustomRenderEnabled = onRender != null
     if (onRender != null) this.onRender = onRender
     else this.onRender = () => ``
-    this.#domHandler = new DOMHandler(
-      stateId,
-      stateWrapper,
+    // create an dom handler instance to manage the DOM updates
+    this.#domHandler = new DOMUpdatesHandler(
+      id,
+      wrapper,
       this.#isCustomRenderEnabled,
       this.onRender
     )
-    this.#domHandler.updateElements(this.#stateCurrent)
+    // update dom elements with the initial state
+    this.#domHandler.updateDOMElements(this.#stateCurrent)
   }
+  // this is the only method that changes the stateCurrent property
+  // also, it triggers the onStateChange callback with the current and previous states
   #changeState(state: T) {
     const prevState = this.#stateCurrent
     this.#stateCurrent = state
     this.onStateChange(state, prevState)
   }
-  updateState(state: T) {
+  // this method is used to change the state value and update the DOM
+  update(state: T) {
+    this.#domHandler.updateDOMElements(state)
     this.#changeState(state)
-    this.#domHandler.updateElements(this.#stateCurrent)
   }
-  setInitialState() {
+  // this method resets the state to the initial state
+  reset() {
     this.#changeState(this.#stateInitial)
-    this.#domHandler.updateElements(this.#stateCurrent)
+    this.#domHandler.updateDOMElements(this.#stateCurrent)
   }
 }
