@@ -24,7 +24,25 @@ export class DOMUpdatesHandler<T> {
     if (typeof content !== 'string') throw new Error('onRender must return a string')
     if (element.innerHTML !== content) element.innerHTML = content
   }
+  #handleElementConditionalShow(state: T, element: HTMLElement) {
+    if (!this.#state.isEnum || this.#state.possibleValues.some(value => typeof value !== 'string')) {
+      console.error('data-show-if is only supported for enum states with string values')
+      return
+    }
+    if (!this.#state.possibleValues.includes(element.getAttribute('data-show-if') ?? '')) {
+      console.error(
+        `data-show-if must be one of the possible values ${JSON.stringify(this.#state.possibleValues)}`
+      )
+      return
+    }
+    if (state === element.getAttribute('data-show-if')) element.style.display = ''
+    else element.style.display = 'none'
+  }
   #handleSingleValueStateRendering(state: T, element: HTMLElement) {
+    if (element.getAttribute('data-show-if') !== null) {
+      this.#handleElementConditionalShow(state, element)
+      return
+    }
     if (typeof state === 'string' || typeof state === 'number' || typeof state === 'bigint') {
       const newContent = `${state}`
       // if newContent is the same as the current content, do nothing
