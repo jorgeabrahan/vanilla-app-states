@@ -1,36 +1,26 @@
 export class DOMUpdatesHandler<T> {
   #stateElements: HTMLElement[]
-  #stateId: string
   #stateWrapper: HTMLElement
-  #isCustomRenderEnabled: boolean
-  #onRender: (state: T) => string
-  constructor(
-    stateId: string,
-    stateWrapper: HTMLElement,
-    isCustomRenderEnabled: boolean,
-    onRender: (state: T) => string
-  ) {
-    this.#stateId = stateId
+  #state: State<T>
+  constructor(state: State<T>, stateWrapper: HTMLElement) {
+    this.#state = state
     this.#stateWrapper = stateWrapper
-    this.#isCustomRenderEnabled = isCustomRenderEnabled
     this.#stateElements = Array.from(
-      this.#stateWrapper.querySelectorAll(`[data-state="${this.#stateId}"]`)
+      this.#stateWrapper.querySelectorAll(`[data-state="${this.#state.id}"]`)
     )
-    this.#onRender = onRender
   }
-
   updateDOMElements(state: T) {
     for (const element of this.#stateElements) {
-      if (this.#isCustomRenderEnabled) {
-        this.#handleObjectStateRendering(state, element)
+      if (this.#state.isCustomRenderEnabled) {
+        this.#handleCustomStateRendering(state, element)
         continue
       }
       this.#handleSingleValueStateRendering(state, element)
     }
   }
-  #handleObjectStateRendering(state: T, element: HTMLElement) {
-    if (typeof state !== 'object') return
-    const content = this.#onRender(state)
+  #handleCustomStateRendering(state: T, element: HTMLElement) {
+    // rendering state content with the onRender function
+    const content = this.#state.onRender(state)
     if (typeof content !== 'string') throw new Error('onRender must return a string')
     if (element.innerHTML !== content) element.innerHTML = content
   }
@@ -58,6 +48,9 @@ export class State<T> {
   #stateCurrent: T
   onStateChange: (state: T, prevState: T) => void
   onRender: (state: T) => string
+  #possibleValues: (string | number)[]
+  // this value determines if a possible values array is used
+  #isEnum: boolean
   #isCustomRenderEnabled: boolean
   #domHandler: DOMUpdatesHandler<T>
 
@@ -69,18 +62,29 @@ export class State<T> {
   get current(): T {
     return this.#stateCurrent
   }
+  get isCustomRenderEnabled(): boolean {
+    return this.#isCustomRenderEnabled
+  }
+  get isEnum(): boolean {
+    return this.#isEnum
+  }
+  get possibleValues(): (string | number)[] {
+    return this.#possibleValues
+  }
   constructor({
     id,
     initial,
     wrapper = document.body,
     onChange = () => {},
-    onRender
+    onRender,
+    possibleValues
   }: {
     id: string
     initial: T
     wrapper?: HTMLElement
     onChange?: (state: T, prevState: T) => void
     onRender?: (state: T) => string
+    possibleValues?: (string | number)[]
   }) {
     if (!id || typeof id !== 'string') throw new Error('id must be a non-empty string')
     if (!(wrapper instanceof HTMLElement))
@@ -90,6 +94,13 @@ export class State<T> {
     this.#stateInitial = initial
     this.#stateCurrent = initial
     this.onStateChange = onChange
+    // if a possible values array is provided, then the state will be considered an enum
+    // therefore when setting the state, the value must be one of the possible values
+    this.#isEnum = possibleValues != null
+    if (possibleValues != null) {
+      this.#possibleValues = possibleValues
+      this.#validatePossibleValues()
+    } else this.#possibleValues = []
     // if an onRender function is provided, it will be used to render the state
     // therefore 'custom rendering' will be enabled
     // otherwise, the default rendering will be used
@@ -97,14 +108,21 @@ export class State<T> {
     if (onRender != null) this.onRender = onRender
     else this.onRender = () => ``
     // create an dom handler instance to manage the DOM updates
-    this.#domHandler = new DOMUpdatesHandler(
-      id,
-      wrapper,
-      this.#isCustomRenderEnabled,
-      this.onRender
-    )
+    this.#domHandler = new DOMUpdatesHandler(this, wrapper)
     // update dom elements with the initial state
     this.#domHandler.updateDOMElements(this.#stateCurrent)
+  }
+  #validatePossibleValues() {
+    if (!(this.#possibleValues instanceof Array)) {
+      throw new Error('possibleValues must be an array')
+    }
+    if (this.#possibleValues.some((value) => typeof value !== 'string' && typeof value !== 'number'))
+      throw new Error('possibleValues must be an array of strings or numbers')
+    if (this.#possibleValues.length === 0) throw new Error('possibleValues must NOT be an empty array')
+    // currently, the possible values array must be a string or a number
+    // therefore the state could only be set to a string or a number
+    if (typeof this.#stateInitial !== 'string' && typeof this.#stateInitial !== 'number')
+      throw new Error('initial must be a string or a number if possibleValues is provided')
   }
   // this is the only method that changes the stateCurrent property
   // also, it triggers the onStateChange callback with the current and previous states
@@ -115,6 +133,20 @@ export class State<T> {
   }
   // this method is used to change the state value and update the DOM
   update(state: T) {
+    // if the state is an enum, then the state must be of type string or number
+    // also the state must be one of the possible values
+    if (this.#isEnum) {
+      if (typeof state !== 'string' && typeof state !== 'number') {
+        console.error('State must be a string or a number to match one of the possible values')
+        return
+      }
+      if (!this.#possibleValues.includes(state)) {
+        console.error(
+          `State must be one of the possible values ${JSON.stringify(this.#possibleValues)}`
+        )
+        return
+      }
+    }
     this.#domHandler.updateDOMElements(state)
     this.#changeState(state)
   }
