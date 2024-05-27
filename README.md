@@ -36,7 +36,7 @@ In the latest version of this package, now you could also preserve your states i
 
 In this documentation you'll learn how to use states created with this package for various applications, such as: conditionally rendering content, preserving data between sessions, restricting its possible values, updating content in the UI, and rendering complex data structures.
 
-<a style="display: block; text-align: right;" href="#🇬🇧-english-documentation">Go back to index</a>
+<a style="display: block; text-align: right;" href="#english-documentation">Go back to index</a>
 
 ## Installation
 
@@ -79,7 +79,7 @@ Another option is to add the `defer` attribute to the `<script>` tag that import
 </body>
 ```
 
-<a style="display: block; text-align: right;" href="#🇬🇧-english-documentation">Go back to index</a>
+<a style="display: block; text-align: right;" href="#english-documentation">Go back to index</a>
 
 ## Usage
 
@@ -98,7 +98,7 @@ const counterState = new State({
 
 In this example, we have created a state called `counterState` with the initial value of `0`.
 
-<a style="display: block; text-align: right;" href="#🇬🇧-english-documentation">Go back to index</a>
+<a style="display: block; text-align: right;" href="#english-documentation">Go back to index</a>
 
 ### Accessing a state
 
@@ -114,7 +114,7 @@ In this example, we have called the `console.log` function and passed the state 
 
 > Note: You can also access the state id from the `id` getter as follows: `counterState.id`.
 
-<a style="display: block; text-align: right;" href="#🇬🇧-english-documentation">Go back to index</a>
+<a style="display: block; text-align: right;" href="#english-documentation">Go back to index</a>
 
 ### Updating a state
 
@@ -142,7 +142,7 @@ counterState.reset()
 counterState.update(0)
 ```
 
-<a style="display: block; text-align: right;" href="#🇬🇧-english-documentation">Go back to index</a>
+<a style="display: block; text-align: right;" href="#english-documentation">Go back to index</a>
 
 ### Listening to state changes
 
@@ -179,7 +179,7 @@ const counterState = new AppState({
 })
 ```
 
-<a style="display: block; text-align: right;" href="#🇬🇧-english-documentation">Go back to index</a>
+<a style="display: block; text-align: right;" href="#english-documentation">Go back to index</a>
 
 ### Using the state in the DOM
 
@@ -197,7 +197,7 @@ In this example, we have created a `span` element with a `data-state` attribute 
 >
 > For more information on how to render states of types other than `string`, `number`, `bigint` or `boolean` you can read the subsection [Rendering complex states](#rendering-complex-states) within the using the state in the DOM section.
 
-<a style="display: block; text-align: right;" href="#🇬🇧-english-documentation">Go back to index</a>
+<a style="display: block; text-align: right;" href="#english-documentation">Go back to index</a>
 
 ### Boolean states
 
@@ -226,7 +226,7 @@ shouldShowParagraphState.update(false)
 
 > Note: In the current version of this package, when the boolean state is set to `false`, this will simply set a `display: none` style to the element or elements that have the `data-state` attribute with the state id. This might change in the future.
 
-<a style="display: block; text-align: right;" href="#🇬🇧-english-documentation">Go back to index</a>
+<a style="display: block; text-align: right;" href="#english-documentation">Go back to index</a>
 
 ### Rendering complex states
 
@@ -358,7 +358,7 @@ This will result in the following behavior:
 
 ![onRender function with other types demonstration](./assets/gifs/onrender-with-other-types.gif)
 
-<a style="display: block; text-align: right;" href="#🇬🇧-english-documentation">Go back to index</a>
+<a style="display: block; text-align: right;" href="#english-documentation">Go back to index</a>
 
 ### Rendering multiple times a state in the DOM
 
@@ -403,7 +403,7 @@ With this change, the state is obtained from the `main` element instead of the `
 
 > Note: If a `wrapper` is not specified, the state is obtained from the `document.body`.
 
-<a style="display: block; text-align: right;" href="#🇬🇧-english-documentation">Go back to index</a>
+<a style="display: block; text-align: right;" href="#english-documentation">Go back to index</a>
 
 ### Using an enum state
 
@@ -643,7 +643,7 @@ In both cases this will result in the following behavior:
 
 ![data-show-if enum state demonstration](./assets/gifs/data-show-if-enum-state.gif)
 
-<a style="display: block; text-align: right;" href="#🇬🇧-english-documentation">Go back to index</a>
+<a style="display: block; text-align: right;" href="#english-documentation">Go back to index</a>
 
 ### Preserving a state in the localStorage
 
@@ -681,7 +681,7 @@ Contributions are welcome.
 
 This package is also published on [npm](https://www.npmjs.com/package/vanilla-app-states).
 
-<a style="display: block; text-align: right;" href="#🇬🇧-english-documentation">Go back to index</a>
+<a style="display: block; text-align: right;" href="#english-documentation">Go back to index</a>
 
 # Documentación en español
 
@@ -711,7 +711,7 @@ En la última versión de este paquete, ahora también puede conservar sus estad
 
 En esta documentación, aprenderá a utilizar los estados creados con este paquete para diversas aplicaciones, como: renderizar contenido condicionalmente, preservar datos entre sesiones, restringir sus posibles valores, actualizar contenido en la interfaz de usuario y renderizar estructuras de datos complejas.
 
-<a style="display: block; text-align: right;" href="#🇪🇸-documentación-en-español">Volver al índice</a>
+<a style="display: block; text-align: right;" href="#documentación-en-español">Volver al índice</a>
 
 ## Instalación
 
@@ -754,7 +754,7 @@ Otra opción es agregar el atributo `defer` a la etiqueta `<script>` que importe
 </body>
 ```
 
-<a style="display: block; text-align: right;" href="#🇪🇸-documentación-en-español">Volver al índice</a>
+<a style="display: block; text-align: right;" href="#documentación-en-español">Volver al índice</a>
 
 ## Uso
 
@@ -773,7 +773,7 @@ const counterState = new State({
 
 En este ejemplo, hemos creado un estado llamado `counterState` con el valor inicial de `0`.
 
-<a style="display: block; text-align: right;" href="#🇪🇸-documentación-en-español">Volver al índice</a>
+<a style="display: block; text-align: right;" href="#documentación-en-español">Volver al índice</a>
 
 ### Accediendo a un estado
 
@@ -789,7 +789,7 @@ En este ejemplo, hemos llamado a la función `console.log` y pasado el valor del
 
 > Nota: También puedes acceder al id del estado desde el getter `id` de la siguiente manera: `counterState.id`.
 
-<a style="display: block; text-align: right;" href="#🇪🇸-documentación-en-español">Volver al índice</a>
+<a style="display: block; text-align: right;" href="#documentación-en-español">Volver al índice</a>
 
 ### Actualizando un estado
 
@@ -817,7 +817,7 @@ counterState.reset()
 counterState.update(0)
 ```
 
-<a style="display: block; text-align: right;" href="#🇪🇸-documentación-en-español">Volver al índice</a>
+<a style="display: block; text-align: right;" href="#documentación-en-español">Volver al índice</a>
 
 ### Escuchando cambios en un estado
 
@@ -854,7 +854,7 @@ const counterState = new State({
 })
 ```
 
-<a style="display: block; text-align: right;" href="#🇪🇸-documentación-en-español">Volver al índice</a>
+<a style="display: block; text-align: right;" href="#documentación-en-español">Volver al índice</a>
 
 ### Utilizando el estado en el DOM
 
@@ -872,7 +872,7 @@ En este ejemplo, hemos creado un elemento `span` con un atributo `data-state` qu
 
 > Para más información sobre como renderizar estados de otros tipos que no sean `string`, `number`, `bigint` o `boolean` puedes leer la subseccion [Renderizando estados complejos](#renderizando-estados-complejos) dentro de la seccion Utilizando el estado en el DOM.
 
-<a style="display: block; text-align: right;" href="#🇪🇸-documentación-en-español">Volver al índice</a>
+<a style="display: block; text-align: right;" href="#documentación-en-español">Volver al índice</a>
 
 ### Estados booleanos
 
@@ -902,7 +902,7 @@ shouldShowParagraphState.update(false)
 > Nota: En la versión actual de este paquete, cuando el estado booleano se establece en `false`, esto simplemente establecerá un estilo `display: none` para el elemento o elementos que tienen el atributo `data-state` con el id del estado. Esto podría cambiar en el futuro.
 
 
-<a style="display: block; text-align: right;" href="#🇪🇸-documentación-en-español">Volver al índice</a>
+<a style="display: block; text-align: right;" href="#documentación-en-español">Volver al índice</a>
 
 ### Renderizando estados complejos
 
@@ -1034,7 +1034,7 @@ Esto dará como resultado el siguiente comportamiento:
 
 ![onRender function with other types demonstration](./assets/gifs/onrender-with-other-types.gif)
 
-<a style="display: block; text-align: right;" href="#🇪🇸-documentación-en-español">Volver al índice</a>
+<a style="display: block; text-align: right;" href="#documentación-en-español">Volver al índice</a>
 
 ### Renderizando multiples veces un estado en el DOM
 
@@ -1080,7 +1080,7 @@ Con este cambio, el estado se obtiene del elemento `main` en lugar del `document
 
 > Nota: Si no se especifica un `wrapper`, el estado se obtiene del `document.body`.
 
-<a style="display: block; text-align: right;" href="#🇪🇸-documentación-en-español">Volver al índice</a>
+<a style="display: block; text-align: right;" href="#documentación-en-español">Volver al índice</a>
 
 ### Utilizando un estado enum
 
@@ -1320,7 +1320,7 @@ En ambos casos esto resultará en el siguiente comportamiento:
 
 ![data-show-if enum state demonstration](./assets/gifs/data-show-if-enum-state.gif)
 
-<a style="display: block; text-align: right;" href="#🇪🇸-documentación-en-español">Volver al índice</a>
+<a style="display: block; text-align: right;" href="#documentación-en-español">Volver al índice</a>
 
 ### Preservando un estado en localStorage
 
@@ -1358,4 +1358,4 @@ Las contribuciones son bienvenidas.
 
 Este paquete también está publicado en [npm](https://www.npmjs.com/package/vanilla-app-states).
 
-<a style="display: block; text-align: right;" href="#🇪🇸-documentación-en-español">Volver al índice</a>
+<a style="display: block; text-align: right;" href="#documentación-en-español">Volver al índice</a>
