@@ -1,6 +1,6 @@
 {
   "name": "vanilla-app-states",
-  "version": "2.2.0",
+  "version": "2.2.3",
   "description": "Manage states in your vanilla web app easily",
   "author": "jorge_siguenza",
   "license": "ISC",
@@ -10,6 +10,9 @@
   "types": "dist/State.d.ts",
   "type": "module",
   "source": "src/State.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "microbundle",
     "dev": "microbundle watch"

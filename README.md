@@ -1,9 +1,13 @@
+IMPORTANT: I highly recommend reading this documentation in [GitHub](https://github.com/jorgeabrahan/vanilla-app-states/#readme) since GIFs are not published here so you won't be able to see them. Also some links (the ones using HTML syntax) might not work in the npm README.
+
+IMPORTANTE: Recomiendo encarecidamente leer esta documentación en [GitHub](https://github.com/jorgeabrahan/vanilla-app-states/#readme) ya que los GIF no se publican aquí por lo que no podrás verlos. Además, es posible que algunos enlaces (los que usan sintaxis HTML) no funcionen en el archivo README de npm.
+
 # vanilla-app-states
 
-- [🇬🇧 English documentation](#🇬🇧-english-documentation)
-- [🇪🇸 Documentación en español](#🇪🇸-documentación-en-español)
+- [🇬🇧 English documentation](#english-documentation)
+- [🇪🇸 Documentación en español](#documentación-en-español)
 
-# 🇬🇧 English documentation
+# English documentation
 
 - [Description](#description)
 - [Installation](#installation)
@@ -679,7 +683,7 @@ This package is also published on [npm](https://www.npmjs.com/package/vanilla-ap
 
 <a style="display: block; text-align: right;" href="#🇬🇧-english-documentation">Go back to index</a>
 
-# 🇪🇸 Documentación en español
+# Documentación en español
 
 - [Descripción](#descripción)
 - [Instalación](#instalación)
