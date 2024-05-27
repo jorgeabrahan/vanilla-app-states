@@ -10,6 +10,9 @@
   "types": "dist/State.d.ts",
   "type": "module",
   "source": "src/State.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "microbundle",
     "dev": "microbundle watch"
