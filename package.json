@@ -1,15 +1,13 @@
 {
   "name": "vanilla-app-states",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Manage states in your vanilla web app easily",
   "author": "jorge_siguenza",
   "license": "ISC",
-
   "main": "dist/State.cjs",
   "module": "dist/State.esm.js",
   "browser": "dist/State.umd.js",
   "types": "dist/State.d.ts",
-
   "type": "module",
   "source": "src/State.ts",
   "scripts": {
