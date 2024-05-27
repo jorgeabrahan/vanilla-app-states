@@ -17,6 +17,7 @@
   - [Rendering complex states](#rendering-complex-states)
   - [Rendering multiple times a state in the DOM](#rendering-multiple-times-a-state-in-the-dom)
   - [Using an enum state](#using-an-enum-state)
+  - [Preserving a state in the localStorage](#preserving-a-state-in-the-localstorage)
 - [Source](#source)
 
 <a style="display: block; text-align: right;" href="#vanilla-app-states">Go back to language selection</a>
@@ -25,6 +26,12 @@
 
 `vanilla-app-states` is a package that allows you to easily manage states in your vanilla web application.
 
+In the context of this package, a state is a value that when updated could (if setup correctly) update also the UI, helping you write a more declarative code.
+
+In the latest version of this package, now you could also preserve your states in localStorage, helping you maintain the state of your application between sessions.
+
+In this documentation you'll learn how to use states created with this package for various applications, such as: conditionally rendering content, preserving data between sessions, restricting its possible values, updating content in the UI, and rendering complex data structures.
+
 <a style="display: block; text-align: right;" href="#🇬🇧-english-documentation">Go back to index</a>
 
 ## Installation
@@ -32,7 +39,7 @@
 To install this package, run the following command in your terminal:
 
 ```bash
-npm install vanilla-app-states
+npm i vanilla-app-states
 ```
 
 Now create a javascript file that imports the `State` class that you will use to create states:
@@ -43,13 +50,13 @@ import { State } from 'vanilla-app-states'
 
 > If you want to start learning how to create states directly you can skip to the section [creating a state](#creating-a-state)
 
-Since you are importing this file, when adding the script to your html file, make sure you specify that it is of type `module`. For example:
+Since you are importing the `State`, when adding the script to your html file, make sure you specify that it is of type `module`. For example:
 
 ```html
 <script type="module" src="./js/app.js"></script>
 ```
 
-Also, in order to access the body elements from the script you must make sure that the `<script>` tag that your javascript file imports is right after the `<body>` tag. For example:
+Also, in order to access the body elements you must make sure that the `<script>` tag is right after the `<body>` tag. For example:
 
 ```html
 <body>
@@ -113,8 +120,6 @@ To update a state, you simply call the `update` function of the `State` class in
 counterState.update(1)
 ```
 
-> Note: If you want to update the state to an initial value, you can call the `reset` function of the `State` class instance instead of setting the initial value manually with `update`.
-
 In this example, we have called the `update` function and passed the new value `1`. This will do the following:
 
 1. Update status.
@@ -122,6 +127,16 @@ In this example, we have called the `update` function and passed the new value `
 3. Call the `onChange` function with the new value and the old value. [more information](#listening-to-state-changes)
 
 > Note: actions are performed in the order previously mentioned. First the state is updated, then the DOM elements are updated and finally the `onChange` function is called. This could be very useful if you want to perform an action after the state has been updated, like adding events to rendered buttons or something like that.
+
+If you want to set the initial value of the state, you can call the `reset` function of the `State` class instance instead of setting the initial value manually with `update`. For example:
+
+```javascript
+// ✅ do this
+counterState.reset()
+
+// ❌ don't do this
+counterState.update(0)
+```
 
 <a style="display: block; text-align: right;" href="#🇬🇧-english-documentation">Go back to index</a>
 
@@ -141,6 +156,8 @@ const counterState = new AppState({
 ```
 
 In this example, we have passed a function that will be executed when the state changes. The function will receive two parameters: `newValue` and `oldValue`. These parameters represent the new value and the old value of the state respectively.
+
+> Note: This function is called right after the DOM is updated, therefore, if you specified and `onRender` function, the `onChange` function will be called after the `onRender` function has been executed. [About the onRender function](#rendering-complex-states)
 
 > Note: The `onChange` function is optional. If not passed, the state will still be updated.
 
@@ -162,18 +179,18 @@ const counterState = new AppState({
 
 ### Using the state in the DOM
 
-To use state in the DOM, you simply create an element that has a `data-state` attribute with the state identifier. For example:
+To use the state in the DOM, you simply need to create an element that has a `data-state` attribute with the state identifier. For example:
 
 ```html
 <p>The counter value is: <span data-state="counter"></span></p>
 ```
 
-In this example, we have created a `span` element with a `data-state` attribute that has the value `counter`. Inside the span with the `data-state` of `counter` (which is the state identifier), the current state value will be displayed, and every time the state is updated, the span value will be updated. Also the first time the state is initialized when creating the instance of the `AppState` class, its initial value will be displayed in the span.
+In this example, we have created a `span` element with a `data-state` attribute that has the value `counter`. Inside the span with the `data-state` of `counter` (which is the state identifier), the current state value will be displayed, and every time the state is updated, the span value will be updated. Also the first time the state is initialized when creating the instance of the `State` class, its initial value will be displayed in the span.
 
 > Note: this only works for states of type `string`, `number` and `bigint`. If the state is a boolean, it will conditionally render the DOM element or elements in which the data-state is set with the state id.
-
+>
 > For more information on using a boolean state you can read the subsection [Boolean states](#boolean-states) within the Using state in the DOM section.
-
+>
 > For more information on how to render states of types other than `string`, `number`, `bigint` or `boolean` you can read the subsection [Rendering complex states](#rendering-complex-states) within the using the state in the DOM section.
 
 <a style="display: block; text-align: right;" href="#🇬🇧-english-documentation">Go back to index</a>
@@ -203,79 +220,143 @@ Therefore, if we change the value of `shouldShowParagraphState` to `false`, the 
 shouldShowParagraphState.update(false)
 ```
 
+> Note: In the current version of this package, when the boolean state is set to `false`, this will simply set a `display: none` style to the element or elements that have the `data-state` attribute with the state id. This might change in the future.
+
 <a style="display: block; text-align: right;" href="#🇬🇧-english-documentation">Go back to index</a>
 
 ### Rendering complex states
 
-If the state is a complex type, such as an `object` or an `array` (of type `object`), you can pass a function to the `onRender` parameter of the `State` constructor. This function will be executed every time the state changes and will receive the new state as a parameter. The `onRender` parameter must return a `string` that will represent the content to be inserted into the DOM in all those elements where the `data-state` corresponds to the state identifier.
+If the state is a complex type, such as an `object` or an `array` (of type `object`), you can pass a function to the `onRender` parameter of the `State` constructor. This function will be executed every time the state changes and will receive the new state as a parameter. The `onRender` function parameter must return a `string` that will represent the content to be inserted into the DOM in all those elements where the `data-state` corresponds to the state identifier.
 
-Below is an example with a state that is an array of objects to create a to-do list functionality:
+Below is an example with a state that is an array of objects to create a to-do list app:
 
 ```html
 <!-- Here you create the form to add things to do -->
 <form id="todo-form">
-  <input type="text" id="name" name="name" placeholder="Add a new todo">
-  <button id="button-add-todo">Add todo</button>
+  <input type="text" name="todo" id="todo">
+  <button type="submit">Add Todo</button>
 </form>
-
 <ul data-state="todos">
   <!-- Here the HTML returned as a template string from the onRender function will be rendered. -->
 </ul>
 ```
 
 ```javascript
-const $todos = document.querySelector('ul[data-state="todos"]')
-/* Here you create the state that manages the to-do list */
 const todos = new State({
   id: 'todos',
   initial: [],
-  onChange: () => {
-    /* Aqui se agregan los eventos al DOM */
-    $todos.querySelectorAll('button[data-role="removeTodo"]').forEach(($button) => {
-      $button.addEventListener('click', () => {
-        todos.update([
-          ...todos.current.filter((todo) => todo.id !== $button.getAttribute('data-todo-id'))
-        ])
-      })
-    })
-  },
-  onRender: (todosCurrent) => {
-    return todosCurrent
+  onRender: (currentState) => {
+    /* Here we specify how the state will be rendered returning a string of the HTML to be inserted */
+    return currentState
       .map(
         (todo) => `
-        <li>
-          <span>${todo.text}</span>
-          <button data-role="removeTodo" data-todo-id="${todo.id}"">Remove</button>
+        <li id="todo-${todo.id}">
+          <p>${todo.text} - ${todo.isCompleted ? 'completed' : 'not completed'}</p>
+          <button data-action="toggle-completed">Toggle completed</button>
+          <button data-action="remove">Remove</button>
         </li>
-      `
+        `
       )
       .join('')
-  }
+      /* notice the todo- prefix in the id attribute, this is because the todo.id is a UUID, and UUIDS might start with a number and querying the DOM with a number as an id will not work */
+  },
+  onChange: onTodosChange,
 })
 
-const $todoForm = document.getElementById('todo-form')
+const handleToggleCompleted = (todo) => {
+  todos.update(todos.current.map(t => {
+    if (t.id === todo.id) {
+      return {
+        ...t,
+        isCompleted: !t.isCompleted
+      }
+    }
+    return t
+  }))
+}
+const handleRemoveTodo = (todo) => {
+  todos.update(todos.current.filter(t => t.id !== todo.id))
+}
 
-/* Here you add things to do */
+// this set will keep track of the todos from the DOM that already have event listeners attached
+// this will help us avoid adding the same event listeners to the same buttons multiple times
+const todosWithListeners = new Set()
+/* Here we add the event listeners to the buttons */
+function onTodosChange(current, previous) {
+  // Event listeners only need to be set if a todo is added to the list
+  // So if the current state has fewer elements or the same number of elements as the previous state
+  // event listeners should not be set
+  if (current.length <= previous.length) return
+  // we need to get the todos list container every time the state changes because if we don't
+  // we won't have the correct reference to the list
+  const $todosList = document.querySelector('ul[data-state="todos"]')
+  for (const todo of current) {
+    // if the todo already has event listeners attached, we skip it
+    if (todosWithListeners.has(todo.id)) continue
+    // otherwise we get the todo element
+    const $todoElement = $todosList.querySelector(`li#todo-${todo.id}`)
+    // set the events to the todo buttons
+    const $bToggleCompleted = $todoElement.querySelector('button[data-action="toggle-completed"]')
+    $bToggleCompleted.addEventListener('click', () => handleToggleCompleted(todo))
+
+    const $removeButton = $todoElement.querySelector('button[data-action="remove"]')
+    $removeButton.addEventListener('click', () => handleRemoveTodo(todo))
+    // and add the todo id to the set of todos with listeners
+    todosWithListeners.add(todo.id)
+  }
+}
+// here we add todos to the list when the form is submitted
+const $todoForm = document.getElementById('todo-form')
 $todoForm.addEventListener('submit', (event) => {
   event.preventDefault()
-  if (!$todoForm.name.value) return
+  if (!$todoForm.todo.value) return
   todos.update([
     ...todos.current,
     {
       id: crypto.randomUUID(),
-      text: $todoForm.name.value
+      text: $todoForm.todo.value,
+      isCompleted: false
     }
   ])
   $todoForm.reset()
 })
 ```
 
-It would be a mistake to add the events in the `onRender` function since the template string with the HTML that it returns is inserted with an `innerHTML` in the DOM, by doing this a new representation of the DOM is created, causing the events that have been assigned to the elements within the returned string template, they are lost.
+Notice that we created a set to keep track of the todos from the DOM that already have event listeners attached. This is to prevent adding the same event listeners to the same buttons multiple times which could result in unexpected behavior.
 
-We understand that using innerHTML to insert the HTML returned by the `onRender` function every time the state changes can result in poor performance, especially if the state is being rendered on multiple DOM elements or undergoes many changes. For this reason, we are considering a more efficient rendering option with a library that allows making only the necessary changes to the DOM. However, this would be added in future versions of this library.
+It would be a mistake to add the event listeners in the `onRender` function, since the string returned by `onRender` is used to create a new representation of the DOM, loosing the events that have been assigned to the elements within the returned string.
 
-> Note: The performance issues mentioned above can only affect rendering complex states using the `onRender` method. If the state is a boolean, string, number, or bigint, you shouldn't worry too much about the effects it may have on performance. Even so, as mentioned above, a solution is being worked on to avoid these problems.
+Notice that, even though the `onRender` function is creating a whole new string of HTML every time the state changes, this whole content is NOT being inserted into the DOM every time the state changes, but instead, it is only updating the necessary elements that have changed thanks to the [morphdom library](https://www.npmjs.com/package/morphdom). You could see it in the following video:
 
+<video width="100%" controls>
+  <source src="./assets/videos/demonstrating-morphdom-minimal-dom-updates.mov" type="video/mp4">
+</video>
+
+Keep in mind that even though we've demonstrated how you could use the `onRender` function to render states of types other than `string`, `number`, `bigint` or `boolean`, since this function overwrites the default rendering of the state, you could also use it to render states of other types, here's an example:
+
+```html
+<p>I have <span data-state="yearsCounter"></span></p>
+<button id="button-increment-years">Increment years</button>
+```
+
+```javascript
+const yearsCounter = new State({
+  id: 'yearsCounter',
+  initial: 1,
+  onRender: (current) => `${current} year${current === 1 ? '' : 's'}`,
+})
+
+const $buttonIncrementYears = document.getElementById('button-increment-years')
+$buttonIncrementYears.addEventListener('click', () => {
+  yearsCounter.update(yearsCounter.current + 1)
+})
+```
+
+This will result in the following behavior:
+
+<video width="100%" controls>
+  <source src="./assets/videos/onrender-with-other-types.mov" type="video/mp4">
+</video>
 
 <a style="display: block; text-align: right;" href="#🇬🇧-english-documentation">Go back to index</a>
 
@@ -464,7 +545,7 @@ we simply need to modify our code to use the `data-show-if` attribute like so:
 </dialog>
 ```
 
-> Note: The `data-show-if` attribute is only supported for enum states with string values. Also if there's a typo in the value of the `data-show-if` attribute, you will get an error. So for instance, if you would've written `crete` instead of `create`, you would get an error, since `crete` is not a possible value of the `possibleValues` array.
+> Note: If there's a typo in the value of the `data-show-if` attribute, you will get an error. So for instance, if you would've written `crete` instead of `create`, you would get an error, since `crete` is not a possible value of the `possibleValues` array.
 
 Now, let's create our state to manage the tabs of the modal(dialog): 
 
@@ -518,7 +599,84 @@ tabSelectorButtons.forEach((button) => {
 })
 ```
 
+Keep in mind this will also work for enum states of type `number`, take a look at the following example:
+
+```html
+<dialog open>
+  <nav>
+    <button class="tabSelectorButton" data-tab="1">Create</button>
+    <button class="tabSelectorButton" data-tab="2">Edit</button>
+    <button class="tabSelectorButton" data-tab="3">Delete</button>
+  </nav>
+  <section data-state="tabs" data-show-if="1">
+    <p>Create Tab</p>
+  </section>
+  <section data-state="tabs" data-show-if="2">
+    <p>Edit Tab</p>
+  </section>
+  <section data-state="tabs" data-show-if="3">
+    <p>Delete Tab</p>
+  </section>
+</dialog>
+```
+
+```javascript
+const modalTabs = {
+  create: 1,
+  edit: 2,
+  delete: 3,
+}
+const tabs = new State({
+  id: 'tabs',
+  initial: modalTabs.create,
+  possibleValues: Object.values(modalTabs)
+})
+
+document.querySelectorAll('.tabSelectorButton').forEach((button) => {
+  button.addEventListener('click', () => {
+    tabs.update(Number(button.getAttribute('data-tab')))
+  })
+})
+```
+
+In both cases this will result in the following behavior:
+
+<video width="100%" controls>
+  <source src="./assets/videos/data-show-if-enum-state.mov" type="video/mp4">
+</video>
+
 <a style="display: block; text-align: right;" href="#🇬🇧-english-documentation">Go back to index</a>
+
+### Preserving a state in the localStorage
+
+To store a state in the localStorage and preserve it across sessions, you can use the `preserve` parameter of the `State` constructor. This parameter will determine whether the state should be preserved or not.
+
+```javascript
+const counterState = new State({
+  id: 'counter',
+  initial: 0,
+  preserve: true
+})
+```
+
+In this example, the `counterState` will be preserved between sessions, so even if the user closes the page and reopens it or reloads it, the state will remain the same as the last time it was modified. Therefore, for the example above, if you increment the counter and reload the page, the counter will be reset to the previous value.
+
+Here's a video demonstration of how the state is preserved across sessions in the localStorage (the video is a demonstration with the todo state):
+
+<video width="100%" controls>
+  <source src="./assets/videos/showing-state-preserve.mov" type="video/mp4">
+</video>
+
+Notice that removing all todos, which calls this function:
+
+```javascript
+const $clearTodosButton = document.getElementById('clear-todos')
+$clearTodosButton.addEventListener('click', () => {
+  todos.reset()
+})
+```
+
+Clears the state completely from the localStorage, this is because since the state is set to its initial value when the reset function is called, storing this initial value makes no sense at all, because the state already has the initial value set when the state instance is created.
 
 ## Source
 
@@ -551,6 +709,12 @@ This package is also published on [npm](https://www.npmjs.com/package/vanilla-ap
 
 `vanilla-app-states` es un paquete que te permite manejar estados en tu aplicación web vanilla de manera fácil.
 
+En el contexto de este paquete, un estado es un valor que, cuando se actualiza, podría (si se configura correctamente) actualizar también la interfaz de usuario, lo que le ayudará a escribir un código más declarativo.
+
+En la última versión de este paquete, ahora también puede conservar sus estados en el localStorage, lo que le ayudara a mantener el estado de su aplicación entre sesiones.
+
+En esta documentación, aprenderá a utilizar los estados creados con este paquete para diversas aplicaciones, como: renderizar contenido condicionalmente, preservar datos entre sesiones, restringir sus posibles valores, actualizar contenido en la interfaz de usuario y renderizar estructuras de datos complejas.
+
 <a style="display: block; text-align: right;" href="#🇪🇸-documentación-en-español">Volver al índice</a>
 
 ## Instalación
@@ -558,7 +722,7 @@ This package is also published on [npm](https://www.npmjs.com/package/vanilla-ap
 Para instalar este paquete, ejecuta el siguiente comando en tu terminal:
 
 ```bash
-npm install vanilla-app-states
+npm i vanilla-app-states
 ```
 
 Ahora crea un archivo de javascript que importe la clase `State` que utilizaras para crear estados:
@@ -569,13 +733,13 @@ import { State } from 'vanilla-app-states'
 
 > Si quieres empezar a aprender como crear estados directamente puedes saltarte a la sección [creando un estado](#creando-un-estado)
 
-Como estas realizando una importacion en este archivo, al agregar el script en tu archivo html, asegurate que especifiques que es de tipo `module`. Por ejemplo:
+Ya que estás importando el `State` en este archivo, al agregar el script en tu archivo html, asegurate que especifiques que es de tipo `module`. Por ejemplo:
 
 ```html
 <script type="module" src="./js/app.js"></script>
 ```
 
-Además, a fin de tener acceso a los elementos del body desde el script debes asegurarte de que la etiqueta `<script>` que importe tu archivo de javascript esté justo despues de la etiqueta `<body>`. Por ejemplo:
+Además, a fin de tener acceso a los elementos del body, debes asegurarte de que la etiqueta `<script>` esté justo despues de la etiqueta `<body>`. Por ejemplo:
 
 ```html
 <body>
@@ -639,15 +803,23 @@ Para actualizar un estado, simplemente debes llamar a la función `update` de la
 counterState.update(1)
 ```
 
-> Nota: Si quieres actualizar el estado a un valor inicial, puedes llamar a la función `reset` de la instancia de la clase `State` en lugar de establecer el valor inicial manualmente con `update`. 
-
 En este ejemplo, hemos llamado a la función `update` y pasado el nuevo valor `1`. Esto va a hacer lo siguiente:
 
 1. Actualizar el estado.
 2. Actualizar los elementos del DOM que utilicen el estado. En caso de que se especifique una funcion `onRender` es en este paso en el que sera llamada. Para mas información lea [utilizando el estado en el DOM](#utilizando-el-estado-en-el-dom) o [renderizando estados complejos con la funcion `onRender`](#renderizando-estados-complejos).
-3. Llamar la función `onChange` con el nuevo valor y el valor anterior del estado. [more information](#listening-to-state-changes)
+3. Llamar la función `onChange` con el nuevo valor y el valor anterior del estado. [más información](#listening-to-state-changes)
 
 > Nota: las acciones se realizan en el orden mencionado anteriormente. Primero se actualiza el estado, luego se actualizan los elementos DOM y finalmente se llama a la función `onChange`. Esto podría resultar muy útil si desea realizar una acción después de que se haya actualizado el estado, como agregar eventos a los botones renderizados o algo así.
+
+Si quieres establecer el valor inicial del estado, puedes llamar a la función `reset` de la instancia de la clase `State` en lugar de establecer el valor inicial manualmente con `update`. Por ejemplo:
+
+```javascript
+// ✅ Haz esto
+counterState.reset()
+
+// ❌ No hagas esto
+counterState.update(0)
+```
 
 <a style="display: block; text-align: right;" href="#🇪🇸-documentación-en-español">Volver al índice</a>
 
@@ -667,6 +839,8 @@ const counterState = new State({
 ```
 
 En este ejemplo, hemos pasado una funcion que se ejecutará cuando el estado cambie. La funcion recibirá dos parámetros: `newValue` y `oldValue`. Estos parámetros representan el nuevo valor y el valor anterior del estado respectivamente.
+
+> Nota: Esta función se llama inmediatamente después de que se actualiza el DOM, por lo tanto, si especificó una función `onRender`, la función `onChange` se llamará después de que se haya ejecutado la función `onRender`. [Acerca de la función onRender](#renderizando-estados-complejos)
 
 > Nota: La funcion `onChange` es opcional. Si no se pasa, el estado igual sera actualizado.
 
@@ -729,79 +903,144 @@ Por lo tanto, si cambiamos el valor de `shouldShowParagraphState` a `false`, el 
 shouldShowParagraphState.update(false)
 ```
 
+> Nota: En la versión actual de este paquete, cuando el estado booleano se establece en `false`, esto simplemente establecerá un estilo `display: none` para el elemento o elementos que tienen el atributo `data-state` con el id del estado. Esto podría cambiar en el futuro.
+
+
 <a style="display: block; text-align: right;" href="#🇪🇸-documentación-en-español">Volver al índice</a>
 
 ### Renderizando estados complejos
 
-Si el estado es un tipo complejo, como un `objeto` o un `arreglo` (de tipo `object`), puedes pasar una función al parámetro `onRender` del constructor de `State`. Esta función se ejecutará cada vez que el estado cambie y recibirá el nuevo estado como parámetro. El parametro `onRender` debe devolver un `string` que representará el contenido a insertar en el DOM en todos aquellos elementos donde el `data-state` corresponde al identificador del estado.
+Si el estado es un tipo complejo, como un `object` o un `array` (de tipo `object`), puede pasar una función al parámetro `onRender` del constructor `State`. Esta función se ejecutará cada vez que cambie el estado y recibirá el nuevo estado como parámetro. El parámetro de la función `onRender` debe devolver una `string` que representará el contenido a insertar en el DOM en todos aquellos elementos donde el `data-state` corresponde al identificador de estado.
 
-A continuación se muestra un ejemplo con un estado que es un arreglo de objetos para crear la funcionalidad de una lista de cosas por hacer:
+A continuación se muestra un ejemplo con un estado que es un arreglo de objetos para crear una aplicación de lista de tareas pendientes:
 
 ```html
-<!-- Aquí se crea el formulario para agregar cosas por hacer -->
+<!-- Aquí creas el formulario para agregar cosas que hacer. -->
 <form id="todo-form">
-  <input type="text" id="name" name="name" placeholder="Add a new todo">
-  <button id="button-add-todo">Add todo</button>
+  <input type="text" name="todo" id="todo">
+  <button type="submit">Agregar cosa por hacer</button>
 </form>
-
 <ul data-state="todos">
-  <!-- Aquí se renderizará el HTML retornado como template string de la función onRender -->
+  <!-- Aquí se renderizará el HTML devuelto como string de la función onRender. -->
 </ul>
 ```
 
 ```javascript
-const $todos = document.querySelector('ul[data-state="todos"]')
-/* Aquí se crea el estado que maneja la lista de cosas por hacer */
 const todos = new State({
   id: 'todos',
   initial: [],
-  onChange: () => {
-    /* Aqui se agregan los eventos al DOM */
-    $todos.querySelectorAll('button[data-role="removeTodo"]').forEach(($button) => {
-      $button.addEventListener('click', () => {
-        todos.update([
-          ...todos.current.filter((todo) => todo.id !== $button.getAttribute('data-todo-id'))
-        ])
-      })
-    })
-  },
-  onRender: (todosCurrent) => {
-    return todosCurrent
+  onRender: (currentState) => {
+    /* Aquí especificamos cómo se representará el estado devolviendo una cadena del HTML que se insertará */
+    return currentState
       .map(
         (todo) => `
-        <li>
-          <span>${todo.text}</span>
-          <button data-role="removeTodo" data-todo-id="${todo.id}"">Remove</button>
+        <li id="todo-${todo.id}">
+          <p>${todo.text} - ${todo.isCompleted ? 'completed' : 'not completed'}</p>
+          <button data-action="toggle-completed">Toggle completed</button>
+          <button data-action="remove">Remove</button>
         </li>
-      `
+        `
       )
       .join('')
-  }
+      /* observe el prefijo todo- en el atributo id, esto se debe a que todo.id es un UUID, y los UUIDS pueden comenzar con un número y hacer un query en el DOM buscando un elemento cuyo id empiece con un número lanzara un error */
+  },
+  onChange: onTodosChange,
 })
 
-const $todoForm = document.getElementById('todo-form')
+const handleToggleCompleted = (todo) => {
+  todos.update(todos.current.map(t => {
+    if (t.id === todo.id) {
+      return {
+        ...t,
+        isCompleted: !t.isCompleted
+      }
+    }
+    return t
+  }))
+}
+const handleRemoveTodo = (todo) => {
+  todos.update(todos.current.filter(t => t.id !== todo.id))
+}
 
-/* Aquí se agregan cosas por hacer al estado todos */
+// este 'Set' realizará un seguimiento de todos los 'todos' (o cosas por hacer) del DOM que ya tengan un event listener asociado
+// esto nos ayudará a evitar agregar event listeners a los mismos botones varias veces
+const todosWithListeners = new Set()
+/* Aqui agregamos event listeners a los botones */
+function onTodosChange(current, previous) {
+  // Solo se tienen que establecer event listeners si se agregaron tareas a la lista
+  // Por lo que si el estado actual tiene menos elementos o la misma cantidad de elementos que el estado anterior
+  // no se deben establecer event listeners
+  if (current.length <= previous.length) return
+  // Necesitamos obtener el contenedor de la lista de tareas cada vez que cambia el estado porque si no lo hacemos
+  // no tendremos la referencia correcta a la lista
+  const $todosList = document.querySelector('ul[data-state="todos"]')
+  for (const todo of current) {
+    // Si el 'todo' ya tiene establecidos los event listeners, lo omitimos.
+    if (todosWithListeners.has(todo.id)) continue
+    // en caso contrario obtenemos el elemento del DOM que representa el 'todo'
+    const $todoElement = $todosList.querySelector(`li#todo-${todo.id}`)
+    // y establecemos los event listeners a los botones
+    const $bToggleCompleted = $todoElement.querySelector('button[data-action="toggle-completed"]')
+    $bToggleCompleted.addEventListener('click', () => handleToggleCompleted(todo))
+
+    const $removeButton = $todoElement.querySelector('button[data-action="remove"]')
+    $removeButton.addEventListener('click', () => handleRemoveTodo(todo))
+    // por ultimo agregamos el id del 'todo' a la lista de todos con event listeners
+    todosWithListeners.add(todo.id)
+  }
+}
+// aqui agregamos cosas por hacer a la lista cuando el formulario de creación de tareas es enviado
+const $todoForm = document.getElementById('todo-form')
 $todoForm.addEventListener('submit', (event) => {
   event.preventDefault()
-  if (!$todoForm.name.value) return
+  if (!$todoForm.todo.value) return
   todos.update([
     ...todos.current,
     {
       id: crypto.randomUUID(),
-      text: $todoForm.name.value
+      text: $todoForm.todo.value,
+      isCompleted: false
     }
   ])
   $todoForm.reset()
 })
 ```
 
-Sería un error agregar los eventos en la función `onRender` ya que el template string con el HTML que retorna se inserta con un `innerHTML` en el DOM, al hacer esto se crea una nueva representación del DOM ocasionando que los eventos que se hayan asignado a los elementos dentro de la template string retornadas, se pierdan.
+Observe que creamos un `Set` para realizar un seguimiento de los 'todos' (o cosas por hacer) del DOM que ya tienen event listeners en sus botones. Esto es para evitar agregar event listeners a los mismos botones varias veces, lo que podría provocar un comportamiento inesperado.
 
-Entendemos que utilizar el innerHTML para insertar el HTML retornado por la funcion `onRender` cada vez que el estado cambie puede resultar en un mal rendimiento, especialmente si el estado esta siendo renderizado en multiples elementos del DOM o sufre muchos cambios. Por ello estamos considerando una opción de renderización más eficiente con alguna librería que permita hacer solo los cambios necesarios en el DOM. Sin embargo, esto sería añadido en versiones futuras de esta librería.
+Sería un error agregar los event listeners en la función `onRender`, ya que la cadena devuelta por `onRender` se usa para crear una nueva representación del DOM, perdiendo los eventos que han sido asignados a los elementos dentro de la cadena devuelta.
 
-> Nota: Los problemas de rendimiento mencionados anteriormente solo pueden afectar a la renderización de estados complejos utilizando el el método `onRender`. Si el estado es un booleano, una string, un número o un bigint, no deberías preocuparte demasiado por los efectos que pueda tener en el rendimiento. Aun así, como ya se mencionó anteriormente, se esta trabajando en una solución para evitar estos problemas.
+Tenga en cuenta que, aunque la función `onRender` crea una cadena HTML completamente nueva cada vez que cambia el estado, No se esta insertando todo este contenido en el DOM cada vez que cambia el estado, sino que solo se actualizan los elementos que han cambiado gracias a la [biblioteca morphdom](https://www.npmjs.com/package/morphdom). Esto se puede apreciar en el siguiente vídeo:
 
+<video width="100%" controls>
+  <source src="./assets/videos/demonstrating-morphdom-minimal-dom-updates.mov" type="video/mp4">
+</video>
+
+Tenga en cuenta que, aunque hemos demostrado cómo se puede utilizar la función `onRender` para representar estados de tipos distintos de `string`, `number`, `bigint` o `boolean`, dado que esta función sobrescribe la representación predeterminada de el estado, también puedes usarlo para representar estados de otros tipos, aquí tienes un ejemplo:
+
+```html
+<p>I have <span data-state="yearsCounter"></span></p>
+<button id="button-increment-years">Incrementar años</button>
+```
+
+```javascript
+const yearsCounter = new State({
+  id: 'yearsCounter',
+  initial: 1,
+  onRender: (current) => `${current} year${current === 1 ? '' : 's'}`,
+})
+
+const $buttonIncrementYears = document.getElementById('button-increment-years')
+$buttonIncrementYears.addEventListener('click', () => {
+  yearsCounter.update(yearsCounter.current + 1)
+})
+```
+
+Esto dará como resultado el siguiente comportamiento:
+
+<video width="100%" controls>
+  <source src="./assets/videos/onrender-with-other-types.mov" type="video/mp4">
+</video>
 
 <a style="display: block; text-align: right;" href="#🇪🇸-documentación-en-español">Volver al índice</a>
 
@@ -991,7 +1230,7 @@ Simplemente necesitamos modificar nuestro código para usar el atributo `data-sh
 </dialog>
 ```
 
-> Nota: El atributo `data-show-if` solo se admite para estados enum con valores de `string`. Además, si hay un error tipográfico en el valor del atributo `data-show-if`, obtendrá un error. Entonces, por ejemplo, si hubiera escrito `creta` en lugar de `create`, obtendría un error, ya que `creta` no es un valor posible del arreglo `posiblesValues`.
+> Nota: Si hay un error tipográfico en el valor del atributo `data-show-if`, obtendrá un error. Entonces, por ejemplo, si hubiera escrito `creta` en lugar de `create`, obtendría un error, ya que `creta` no es un valor posible del arreglo `posiblesValues`.
 
 Ahora, creemos nuestro estado para administrar las pestañas del modal (diálogo):
 
@@ -1045,7 +1284,84 @@ tabSelectorButtons.forEach((button) => {
 })
 ```
 
+Tenga en cuenta que esto también funcionará para estados de enumeración de tipo "número". Mire el siguiente ejemplo:
+
+```html
+<dialog open>
+  <nav>
+    <button class="tabSelectorButton" data-tab="1">Create</button>
+    <button class="tabSelectorButton" data-tab="2">Edit</button>
+    <button class="tabSelectorButton" data-tab="3">Delete</button>
+  </nav>
+  <section data-state="tabs" data-show-if="1">
+    <p>Create Tab</p>
+  </section>
+  <section data-state="tabs" data-show-if="2">
+    <p>Edit Tab</p>
+  </section>
+  <section data-state="tabs" data-show-if="3">
+    <p>Delete Tab</p>
+  </section>
+</dialog>
+```
+
+```javascript
+const modalTabs = {
+  create: 1,
+  edit: 2,
+  delete: 3,
+}
+const tabs = new State({
+  id: 'tabs',
+  initial: modalTabs.create,
+  possibleValues: Object.values(modalTabs)
+})
+
+document.querySelectorAll('.tabSelectorButton').forEach((button) => {
+  button.addEventListener('click', () => {
+    tabs.update(Number(button.getAttribute('data-tab')))
+  })
+})
+```
+
+En ambos casos esto resultará en el siguiente comportamiento:
+
+<video width="100%" controls>
+  <source src="./assets/videos/data-show-if-enum-state.mov" type="video/mp4">
+</video>
+
 <a style="display: block; text-align: right;" href="#🇪🇸-documentación-en-español">Volver al índice</a>
+
+### Preservando un estado en localStorage
+
+Para almacenar un estado en localStorage y conservarlo entre sesiones, puede utilizar el parámetro `preserve` del constructor `State`. Este parámetro determinará si el estado debe conservarse o no.
+
+```javascript
+const counterState = new State({
+  id: 'counter',
+  initial: 0,
+  preserve: true
+})
+```
+
+En este ejemplo, el `counterState` se conservará entre sesiones, así aunque el usuario cierre la página y la vuelva a abrir o la recarge el estado se mantendra igual que como la ultima vez que lo modifico. Por lo tanto, para el ejemplo anterior, si incrementa el contador y recarga la página, el contador se restaurará al valor anterior.
+
+Aquí hay una demostración en video de cómo se preserva el estado entre sesiones en el almacenamiento local (el video es una demostración con el estado `todo`):
+
+<video width="100%" controls>
+  <source src="./assets/videos/showing-state-preserve.mov" type="video/mp4">
+</video>
+
+Observe que al eliminar todas las cosas por hacer, lo que llama a esta función:
+
+```javascript
+const $clearTodosButton = document.getElementById('clear-todos')
+$clearTodosButton.addEventListener('click', () => {
+  todos.reset()
+})
+```
+
+Borra el estado completamente del almacenamiento local, esto se debe a que dado que el estado se establece en su valor inicial cuando se llama a la función `reset`, almacenar este valor inicial no tiene ningún sentido, porque el estado ya tiene el valor inicial establecido cuando se crea la instancia del estado.
 
 ## Recursos
 
