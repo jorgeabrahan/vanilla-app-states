@@ -1,3 +1,7 @@
+IMPORTANT: I highly recommend reading this documentation in GitHub since GIFs are not published here so you won't be able to see them. Also some links (the ones using HTML syntax) might not work in the npm README.
+
+IMPORTANTE: Recomiendo encarecidamente leer esta documentación en GitHub ya que los GIF no se publican aquí por lo que no podrás verlos. Además, es posible que algunos enlaces (los que usan sintaxis HTML) no funcionen en el archivo README de npm.
+
 # vanilla-app-states
 
 - [🇬🇧 English documentation](#🇬🇧-english-documentation)
