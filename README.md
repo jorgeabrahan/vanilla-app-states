@@ -11,6 +11,8 @@ IMPORTANTE: Recomiendo encarecidamente leer esta documentación en [GitHub](http
 
 - [Description](#description)
 - [Installation](#installation)
+  - [If you are using a bundler](#if-you-are-using-a-bundler)
+  - [If you are NOT using a bundler](#if-you-are-not-using-a-bundler)
 - [Usage](#usage)
   - [Creating a state](#creating-a-state)
   - [Accessing a state](#accessing-a-state)
@@ -40,6 +42,8 @@ In this documentation you'll learn how to use states created with this package f
 
 ## Installation
 
+### If you are using a bundler
+
 To install this package, run the following command in your terminal:
 
 ```bash
@@ -51,6 +55,19 @@ Now create a javascript file that imports the `State` class that you will use to
 ```javascript
 import { State } from 'vanilla-app-states'
 ```
+
+> If you want to start learning how to create states directly you can skip to the section [creating a state](#creating-a-state)
+
+<a style="display: block; text-align: right;" href="#english-documentation">Go back to index</a>
+
+### If you are NOT using a bundler
+
+You could simply import the `State` class using skypack cdn like so:
+
+```javascript
+import { State } from 'https://cdn.skypack.dev/vanilla-app-states';
+```
+
 
 > If you want to start learning how to create states directly you can skip to the section [creating a state](#creating-a-state)
 
@@ -687,6 +704,8 @@ This package is also published on [npm](https://www.npmjs.com/package/vanilla-ap
 
 - [Descripción](#descripción)
 - [Instalación](#instalación)
+  - [Si estás usando un bundler](#si-estás-usando-un-bundler)
+  - [Si NO estás usando un bundler](#si-no-estás-usando-un-bundler)
 - [Uso](#uso)
   - [Creando un estado](#creando-un-estado)
   - [Accediendo a un estado](#accediendo-a-un-estado)
@@ -715,6 +734,8 @@ En esta documentación, aprenderá a utilizar los estados creados con este paque
 
 ## Instalación
 
+### Si estás usando un bundler
+
 Para instalar este paquete, ejecuta el siguiente comando en tu terminal:
 
 ```bash
@@ -725,6 +746,18 @@ Ahora crea un archivo de javascript que importe la clase `State` que utilizaras 
 
 ```javascript
 import { State } from 'vanilla-app-states'
+```
+
+> Si quieres empezar a aprender como crear estados directamente puedes saltarte a la sección [creando un estado](#creando-un-estado)
+
+<a style="display: block; text-align: right;" href="#english-documentation">Go back to index</a>
+
+### Si NO estás usando un bundler
+
+Puedes simplemente importar la clase `State` usando skypack cdn de la siguiente manera:
+
+```javascript
+import { State } from 'https://cdn.skypack.dev/vanilla-app-states';
 ```
 
 > Si quieres empezar a aprender como crear estados directamente puedes saltarte a la sección [creando un estado](#creando-un-estado)
