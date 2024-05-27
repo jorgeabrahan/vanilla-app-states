@@ -328,9 +328,7 @@ It would be a mistake to add the event listeners in the `onRender` function, sin
 
 Notice that, even though the `onRender` function is creating a whole new string of HTML every time the state changes, this whole content is NOT being inserted into the DOM every time the state changes, but instead, it is only updating the necessary elements that have changed thanks to the [morphdom library](https://www.npmjs.com/package/morphdom). You could see it in the following video:
 
-<video width="100%" controls>
-  <source src="./assets/videos/demonstrating-morphdom-minimal-dom-updates.mov" type="video/mp4">
-</video>
+![demonstrating morphdom minimal dom updates](./assets/gifs/demonstrating-morphdom-minimal-dom-updates.gif)
 
 Keep in mind that even though we've demonstrated how you could use the `onRender` function to render states of types other than `string`, `number`, `bigint` or `boolean`, since this function overwrites the default rendering of the state, you could also use it to render states of other types, here's an example:
 
@@ -354,9 +352,7 @@ $buttonIncrementYears.addEventListener('click', () => {
 
 This will result in the following behavior:
 
-<video width="100%" controls>
-  <source src="./assets/videos/onrender-with-other-types.mov" type="video/mp4">
-</video>
+![onRender function with other types demonstration](./assets/gifs/onrender-with-other-types.gif)
 
 <a style="display: block; text-align: right;" href="#🇬🇧-english-documentation">Go back to index</a>
 
@@ -641,9 +637,7 @@ document.querySelectorAll('.tabSelectorButton').forEach((button) => {
 
 In both cases this will result in the following behavior:
 
-<video width="100%" controls>
-  <source src="./assets/videos/data-show-if-enum-state.mov" type="video/mp4">
-</video>
+![data-show-if enum state demonstration](./assets/gifs/data-show-if-enum-state.gif)
 
 <a style="display: block; text-align: right;" href="#🇬🇧-english-documentation">Go back to index</a>
 
@@ -663,9 +657,7 @@ In this example, the `counterState` will be preserved between sessions, so even 
 
 Here's a video demonstration of how the state is preserved across sessions in the localStorage (the video is a demonstration with the todo state):
 
-<video width="100%" controls>
-  <source src="./assets/videos/showing-state-preserve.mov" type="video/mp4">
-</video>
+![showing state preserve](./assets/gifs/showing-state-preserve.gif)
 
 Notice that removing all todos, which calls this function:
 
@@ -1012,9 +1004,7 @@ Sería un error agregar los event listeners en la función `onRender`, ya que la
 
 Tenga en cuenta que, aunque la función `onRender` crea una cadena HTML completamente nueva cada vez que cambia el estado, No se esta insertando todo este contenido en el DOM cada vez que cambia el estado, sino que solo se actualizan los elementos que han cambiado gracias a la [biblioteca morphdom](https://www.npmjs.com/package/morphdom). Esto se puede apreciar en el siguiente vídeo:
 
-<video width="100%" controls>
-  <source src="./assets/videos/demonstrating-morphdom-minimal-dom-updates.mov" type="video/mp4">
-</video>
+![demonstrating morphdom minimal dom updates](./assets/gifs/demonstrating-morphdom-minimal-dom-updates.gif)
 
 Tenga en cuenta que, aunque hemos demostrado cómo se puede utilizar la función `onRender` para representar estados de tipos distintos de `string`, `number`, `bigint` o `boolean`, dado que esta función sobrescribe la representación predeterminada de el estado, también puedes usarlo para representar estados de otros tipos, aquí tienes un ejemplo:
 
@@ -1038,9 +1028,7 @@ $buttonIncrementYears.addEventListener('click', () => {
 
 Esto dará como resultado el siguiente comportamiento:
 
-<video width="100%" controls>
-  <source src="./assets/videos/onrender-with-other-types.mov" type="video/mp4">
-</video>
+![onRender function with other types demonstration](./assets/gifs/onrender-with-other-types.gif)
 
 <a style="display: block; text-align: right;" href="#🇪🇸-documentación-en-español">Volver al índice</a>
 
@@ -1326,9 +1314,7 @@ document.querySelectorAll('.tabSelectorButton').forEach((button) => {
 
 En ambos casos esto resultará en el siguiente comportamiento:
 
-<video width="100%" controls>
-  <source src="./assets/videos/data-show-if-enum-state.mov" type="video/mp4">
-</video>
+![data-show-if enum state demonstration](./assets/gifs/data-show-if-enum-state.gif)
 
 <a style="display: block; text-align: right;" href="#🇪🇸-documentación-en-español">Volver al índice</a>
 
@@ -1348,9 +1334,7 @@ En este ejemplo, el `counterState` se conservará entre sesiones, así aunque el
 
 Aquí hay una demostración en video de cómo se preserva el estado entre sesiones en el almacenamiento local (el video es una demostración con el estado `todo`):
 
-<video width="100%" controls>
-  <source src="./assets/videos/showing-state-preserve.mov" type="video/mp4">
-</video>
+![showing state preserve](./assets/gifs/showing-state-preserve.gif)
 
 Observe que al eliminar todas las cosas por hacer, lo que llama a esta función:
 
