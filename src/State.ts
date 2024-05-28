@@ -76,6 +76,7 @@ export class State<T> {
 
     this.#domManager = new DOMManager(this)
     this.#domManager.updateElements(currentStateValue)
+    if (this.#preserve) this.onChange(currentStateValue, initial)
   }
   #changeState(state: T) {
     const prevState = this.#current
