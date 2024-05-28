@@ -676,6 +676,8 @@ const counterState = new State({
 
 In this example, the `counterState` will be preserved between sessions, so even if the user closes the page and reopens it or reloads it, the state will remain the same as the last time it was modified. Therefore, for the example above, if you increment the counter and reload the page, the counter will be reset to the previous value.
 
+❗️ IMPORTANT: By setting the `preserve` parameter to `true`, the `onChange` function will be executed on the first render, this is because when preserve is set to true it is considered that there was a change in the state, where its initial value was the one that was passed in the constructor, and its current value is the one obtained from local storage.
+
 Here's a video demonstration of how the state is preserved across sessions in the localStorage (the video is a demonstration with the todo state):
 
 ![showing state preserve](./assets/gifs/showing-state-preserve.gif)
@@ -1368,6 +1370,8 @@ const counterState = new State({
 ```
 
 En este ejemplo, el `counterState` se conservará entre sesiones, así aunque el usuario cierre la página y la vuelva a abrir o la recarge el estado se mantendra igual que como la ultima vez que lo modifico. Por lo tanto, para el ejemplo anterior, si incrementa el contador y recarga la página, el contador se restaurará al valor anterior.
+
+❗️ IMPORTANTE: Al establecer el parámetro `preserve` en `true`, la función `onChange` se ejecutará en el primer renderizado, esto porque cuando preserve esta en true se considera que hubo un cambio en el estado, donde su valor inicial era el que se paso en el constructor, y su valor actual es el que se obtuvo del almacenamiento local.
 
 Aquí hay una demostración en video de cómo se preserva el estado entre sesiones en el almacenamiento local (el video es una demostración con el estado `todo`):
 
